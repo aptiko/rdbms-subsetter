@@ -35,11 +35,11 @@ setup(
         "blinker",
         "sqlalchemy",
     ],
-    license="CC0",
+    license="GNU General Public License v3",
     keywords='database testing',
     classifiers=[
         'Development Status :: 3 - Alpha',
-        'License :: CC0 1.0 Universal (CC0 1.0) Public Domain Dedication',
+        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
         'Natural Language :: English',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
