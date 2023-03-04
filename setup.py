@@ -30,7 +30,7 @@ setup(
     long_description=readme,
     author='Catherine Devlin',
     author_email='catherine.devlin@gsa.gov',
-    url='https://github.com/18F/rdbms-subsetter',
+    url='https://github.com/aptiko/rdbms-subsetter',
     install_requires=[
         "blinker",
         "sqlalchemy",

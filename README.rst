@@ -172,7 +172,7 @@ Will consume memory roughly equal to the size of the *extracted* database.
 Development
 -----------
 
-https://github.com/18F/rdbms-subsetter
+https://github.com/aptiko/rdbms-subsetter
 
 See also
 --------
