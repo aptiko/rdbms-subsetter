@@ -112,7 +112,8 @@ def _find_n_rows(self, estimate=False):
                 "failed to get approximate rowcount for %s\n%s" % (self.name, str(e))
             )
     if not self.n_rows:
-        self.n_rows = self.db.conn.execute(self.count()).fetchone()[0]
+        count_query = sa.select(sa.func.count()).select_from(self)
+        self.n_rows = self.db.conn.execute(count_query).fetchone()[0]
 
 
 def _random_row_func(self):
@@ -189,7 +190,9 @@ def _pk_val(self, row):
 
 
 def _by_pk(self, pk):
-    pk_name = self.db.inspector.get_primary_keys(self.name, self.schema)[0]
+    pk_name = self.db.inspector.get_pk_constraint(self.name, self.schema)[
+        "constrained_columns"
+    ][0]
     slct = self.filtered_by(**{pk_name: pk})
     return self.db.conn.execute(slct).fetchone()
 
@@ -271,7 +274,9 @@ class Db:
                 tbl.find_n_rows = types.MethodType(_find_n_rows, tbl)
                 tbl.random_row_func = types.MethodType(_random_row_func, tbl)
                 tbl.fks = self.inspector.get_foreign_keys(tbl.name, schema=tbl.schema)
-                tbl.pk = self.inspector.get_primary_keys(tbl.name, schema=tbl.schema)
+                tbl.pk = self.inspector.get_pk_constraint(tbl.name, schema=tbl.schema)[
+                    "constrained_columns"
+                ]
                 if not tbl.pk:
                     tbl.pk = [
                         d["name"]
@@ -387,9 +392,14 @@ class Db:
                         any_non_null_key_columns = True
                         break
                 if any_non_null_key_columns:
-                    target_parent_row = target_db.conn.execute(slct).first()
-                    if not target_parent_row:
-                        source_parent_row = self.conn.execute(slct).first()
+                    result = target_db.conn.execute(slct)
+                    keys = result.keys()
+                    values = result.first()
+                    if values is None:
+                        result = self.conn.execute(slct)
+                        keys = result.keys()
+                        values = result.first()
+                        source_parent_row = dict(zip(keys, values))
                         self.create_row_in(source_parent_row, target_db, target_parent)
 
             # make sure that all referenced rows are in referenced table(s)
@@ -415,10 +425,13 @@ class Db:
                 if any_non_null_key_columns:
                     target_referred_row = target_db.conn.execute(slct).first()
                     if not target_referred_row:
-                        source_referred_row = self.conn.execute(slct).first()
+                        result = self.conn.execute(slct)
+                        keys = result.keys()
+                        values = result.first()
                         # because constraints aren't enforced like real FKs, the
                         # referred row isn't guaranteed to exist
-                        if source_referred_row:
+                        if values:
+                            source_referred_row = dict(zip(keys, values))
                             self.create_row_in(
                                 source_referred_row, target_db, target_referred
                             )
@@ -464,7 +477,7 @@ class Db:
         )
 
     def insert_one(self, table, pk, values):
-        self.conn.execute(table.insert(), values)
+        self.conn.execute(table.insert(), *values)
         table.done.add(pk)
 
     def flush(self):
@@ -474,6 +487,7 @@ class Db:
             self.conn.execute(table.insert(), list(table.pending.values()))
             table.done = table.done.union(table.pending.keys())
             table.pending = dict()
+        return
 
     def create_subset_in(self, target_db):
 
@@ -519,7 +533,8 @@ class Db:
             )
             if target.completeness_score() > 0.97:
                 break
-            (source_row, prioritized) = target.source.next_row()
+            (values, prioritized) = target.source.next_row()
+            source_row = dict(zip(target.columns.keys(), values))
             self.create_row_in(source_row, target_db, target, prioritized=prioritized)
 
             if target_db.pending > self.args.buffer > 0:
