@@ -1,26 +1,6 @@
 rdbms-subsetter
 ===============
 
-.. image:: https://img.shields.io/pypi/v/rdbms-subsetter.svg
-   :target: https://pypi.python.org/pypi/rdbms-subsetter
-   :alt: PyPI status
-
-.. image:: https://circleci.com/gh/18F/rdbms-subsetter.svg?style=svg
-   :target: https://circleci.com/gh/18F/rdbms-subsetter
-   :alt: CircleCI status
-
-.. image:: https://api.codeclimate.com/v1/badges/8fe62703d4999c07968c/maintainability
-   :target: https://codeclimate.com/github/18F/rdbms-subsetter/maintainability
-   :alt: Maintainability
-
-.. image:: https://api.codeclimate.com/v1/badges/8fe62703d4999c07968c/test_coverage
-   :target: https://codeclimate.com/github/18F/rdbms-subsetter/test_coverage
-   :alt: Test Coverage
-
-.. image:: https://gemnasium.com/badges/github.com/18F/rdbms-subsetter.svg
-   :target: https://gemnasium.com/github.com/18F/rdbms-subsetter
-   :alt: Gemnasium
-
 Generate a random sample of rows from a relational database that preserves
 referential integrity - so long as constraints are defined, all parent rows
 will exist for child rows.
