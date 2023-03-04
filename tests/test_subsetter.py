@@ -55,20 +55,35 @@ def sqla_url(filename):
 
 
 def insert_data(curs):
-    for params in (('MN', 'Minnesota'), ('OH', 'Ohio'),
-                   ('MA', 'Massachussetts'), ('MI', 'Michigan')):
+    for params in (
+        ("MN", "Minnesota"),
+        ("OH", "Ohio"),
+        ("MA", "Massachussetts"),
+        ("MI", "Michigan"),
+    ):
         curs.execute("INSERT INTO state VALUES (?, ?)", params)
-    for params in (('Duluth', 'MN'), ('Dayton', 'OH'), ('Boston', 'MA'),
-                   ('Houghton', 'MI')):
+    for params in (
+        ("Duluth", "MN"),
+        ("Dayton", "OH"),
+        ("Boston", "MA"),
+        ("Houghton", "MI"),
+    ):
         curs.execute("INSERT INTO city VALUES (?, ?)", params)
-    for params in (('Lift Bridge', 'Duluth'), ("Mendelson's", 'Dayton'),
-                   ('Trinity Church', 'Boston'),
-                   ('Michigan Tech', 'Houghton')):
+    for params in (
+        ("Lift Bridge", "Duluth"),
+        ("Mendelson's", "Dayton"),
+        ("Trinity Church", "Boston"),
+        ("Michigan Tech", "Houghton"),
+    ):
         curs.execute("INSERT INTO landmark VALUES (?, ?)", params)
-    for params in (('Graf Zeppelin', None), ('USS Los Angeles', None),
-                   ('Nordstern', None), ('Bodensee', None)):
+    for params in (
+        ("Graf Zeppelin", None),
+        ("USS Los Angeles", None),
+        ("Nordstern", None),
+        ("Bodensee", None),
+    ):
         curs.execute("INSERT INTO zeppelins VALUES (?, ?)", params)
-    for params in (('Zeppo Marx', 'New York City'), ):
+    for params in (("Zeppo Marx", "New York City"),):
         curs.execute("INSERT INTO zeppos VALUES (?, ?)", params)
 
 
@@ -107,10 +122,11 @@ def test_parents_kept(sqlite_data):
     dest_curs = dest.conn.connection.cursor()
     cities = dest_curs.execute("SELECT * FROM city").fetchall()
     assert len(cities) == 1
-    joined = dest_curs.execute("""SELECT c.name, s.name
+    joined = dest_curs.execute(
+        """SELECT c.name, s.name
                                     FROM city c JOIN state s
-                                    ON (c.state_abbrev = s.abbrev)""").fetchall(
-    )
+                                    ON (c.state_abbrev = s.abbrev)"""
+    ).fetchall()
     assert len(joined) == 1
 
 
@@ -123,15 +139,19 @@ def test_null_foreign_keys(sqlite_data):
 
 def test_tables_arg(sqlite_data):
     args_with_tables = DummyArgs()
-    args_with_tables.tables = ['state', 'city']
+    args_with_tables.tables = ["state", "city"]
     (src, dest) = results(*sqlite_data, args_with_tables)
     dest_curs = dest.conn.connection.cursor()
     states = dest_curs.execute("SELECT * FROM state").fetchall()
     assert len(states) == 1
     cities = dest_curs.execute("SELECT * FROM city").fetchall()
     assert len(cities) == 1
-    excluded_tables = ('landmark', 'languages_better_than_python', 'zeppos',
-                       'zeppelins')
+    excluded_tables = (
+        "landmark",
+        "languages_better_than_python",
+        "zeppos",
+        "zeppelins",
+    )
     for table in excluded_tables:
         rows = dest_curs.execute("SELECT * FROM {}".format(table)).fetchall()
         assert not rows
@@ -139,7 +159,9 @@ def test_tables_arg(sqlite_data):
 
 def test_exclude_tables(sqlite_data):
     args_with_exclude = DummyArgs()
-    args_with_exclude.exclude_tables = ['zeppelins', ]
+    args_with_exclude.exclude_tables = [
+        "zeppelins",
+    ]
     (src, dest) = results(*sqlite_data, args_with_exclude)
     dest_curs = dest.conn.connection.cursor()
     zeppelins = dest_curs.execute("SELECT * FROM zeppelins").fetchall()
@@ -148,14 +170,19 @@ def test_exclude_tables(sqlite_data):
 
 def test_tables_and_exclude_tables(sqlite_data):
     args_with_tables_and_exclude_tables = DummyArgs()
-    args_with_tables_and_exclude_tables.tables = ['state', 'city']
-    args_with_tables_and_exclude_tables.exclude_tables = ['city']
+    args_with_tables_and_exclude_tables.tables = ["state", "city"]
+    args_with_tables_and_exclude_tables.exclude_tables = ["city"]
     (src, dest) = results(*sqlite_data, args_with_tables_and_exclude_tables)
     dest_curs = dest.conn.connection.cursor()
     states = dest_curs.execute("SELECT * FROM state").fetchall()
     assert len(states) == 1
-    excluded_tables = ('city', 'landmark', 'languages_better_than_python',
-                       'zeppos', 'zeppelins')
+    excluded_tables = (
+        "city",
+        "landmark",
+        "languages_better_than_python",
+        "zeppos",
+        "zeppelins",
+    )
     for table in excluded_tables:
         rows = dest_curs.execute("SELECT * FROM {}".format(table)).fetchall()
         assert not rows
@@ -163,7 +190,9 @@ def test_tables_and_exclude_tables(sqlite_data):
 
 def test_full_tables(sqlite_data):
     args_with_full = DummyArgs()
-    args_with_full.full_tables = ['city', ]
+    args_with_full.full_tables = [
+        "city",
+    ]
     (src, dest) = results(*sqlite_data, args_with_full)
     dest_curs = dest.conn.connection.cursor()
     cities = dest_curs.execute("SELECT * FROM city").fetchall()
@@ -172,7 +201,9 @@ def test_full_tables(sqlite_data):
 
 def test_exclude_tables_wildcard(sqlite_data):
     args_with_exclude = DummyArgs()
-    args_with_exclude.exclude_tables = ['zep*', ]
+    args_with_exclude.exclude_tables = [
+        "zep*",
+    ]
     (src, dest) = results(*sqlite_data, args_with_exclude)
     dest_curs = dest.conn.connection.cursor()
     zeppelins = dest_curs.execute("SELECT * FROM zeppelins").fetchall()

@@ -82,7 +82,7 @@ If you need to honor relationships that aren't actually defined as foreign-key
 constraints in the database - for example, if you are using MySQL MyISAM
 and can't define constraints - you can specify a
 configuration file with ``--config``.  The config file should specify constraints
-in JSON.  For example,
+in JSON.  For example::
 
     {
       "constraints": {

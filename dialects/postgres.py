@@ -22,7 +22,8 @@ class ArrayOfEnum(ARRAY):
     """
     Workaround for array-of-enum problem
 
-    See http://docs.sqlalchemy.org/en/latest/dialects/postgresql.html#postgresql-array-of-enum
+    See
+    https://docs.sqlalchemy.org/en/latest/dialects/postgresql.html#postgresql-array-of-enum  # NOQA
     """
 
     def bind_expression(self, bindvalue):
@@ -43,17 +44,20 @@ def fix_postgres_array_of_enum(connection, tbl):
 
     for col in tbl.c:
         col_str = str(col.type)
-        if col_str.endswith('[]'):  # this is an array
+        if col_str.endswith("[]"):  # this is an array
             enum_name = col_str[:-2]
             try:  # test if 'enum_name' is an enum
-                enum_ranges = connection.execute('''
+                enum_ranges = connection.execute(
+                    """
                         SELECT enum_range(NULL::%s);
-                    ''' % enum_name).fetchone()
+                    """
+                    % enum_name
+                ).fetchone()
                 enum_values = sql_enum_to_list(enum_ranges[0])
                 enum = ENUM(*enum_values, name=enum_name)
                 tbl.c[col.name].type = ArrayOfEnum(enum)
             except sa.exc.ProgrammingError as enum_excep:
-                if 'does not exist' in str(enum_excep):
+                if "does not exist" in str(enum_excep):
                     pass  # Must not have been an enum
                 else:
                     raise
