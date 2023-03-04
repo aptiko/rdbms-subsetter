@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Tests for postgres-specific data types"""
 
 import subprocess
@@ -20,7 +18,7 @@ postgresql_dest_proc = factories.postgresql_proc()
 postgresql_dest = factories.postgresql('postgresql_dest_proc')
 
 
-class DummyArgs(object):
+class DummyArgs:
     logarithmic = False
     fraction = 0.25
     force_rows = {}

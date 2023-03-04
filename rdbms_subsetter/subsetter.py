@@ -74,12 +74,6 @@ from sqlalchemy.engine.reflection import Inspector
 
 from dialects.postgres import fix_postgres_array_of_enum
 
-# Python2 has a totally different definition for ``input``; overriding it here
-try:
-    input = raw_input
-except NameError:
-    pass
-
 __version__ = '0.2.6.2'
 
 SIGNAL_ROW_ADDED = 'row_added'
@@ -216,7 +210,7 @@ def _import_modules(import_list):
         __import__(module_name)
 
 
-class Db(object):
+class Db:
     def __init__(self, sqla_conn, args, schemas=[None]):
         self.args = args
         self.sqla_conn = sqla_conn

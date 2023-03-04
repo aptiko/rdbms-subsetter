@@ -1,6 +1,6 @@
 from rdbms_subsetter.subsetter import merge_config_args
 
-class DummyArgs(object):
+class DummyArgs:
     logarithmic = False
     fraction = 0.25
     force_rows = {}

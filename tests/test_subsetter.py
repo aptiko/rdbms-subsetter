@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 """Tests for `sql_insert_writer` package."""
 
 import os
@@ -26,7 +24,7 @@ TABLE_DEFINITIONS = [
 ]
 
 
-class DummyArgs(object):
+class DummyArgs:
     logarithmic = False
     fraction = 0.25
     force_rows = {}
