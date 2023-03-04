@@ -32,7 +32,7 @@ setup(
     url="https://github.com/aptiko/rdbms-subsetter",
     install_requires=[
         "blinker",
-        "sqlalchemy",
+        "sqlalchemy<1.4",
     ],
     license="GNU General Public License v3",
     keywords="database testing",
