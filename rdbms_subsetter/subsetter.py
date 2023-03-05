@@ -376,70 +376,8 @@ class Db:
             return
 
         if not row_exists:
-            # make sure that all required rows are in parent table(s)
-            for fk in target.fks:
-                target_parent = target_db.tables[
-                    (fk["referred_schema"], fk["referred_table"])
-                ]
-                slct = sa.sql.select(
-                    [
-                        target_parent,
-                    ]
-                )
-                any_non_null_key_columns = False
-                for (parent_col, child_col) in zip(
-                    fk["referred_columns"], fk["constrained_columns"]
-                ):
-                    slct = slct.where(
-                        target_parent.c[parent_col] == source_row[child_col]
-                    )
-                    if source_row[child_col] is not None:
-                        any_non_null_key_columns = True
-                        break
-                if any_non_null_key_columns:
-                    result = target_db.conn.execute(slct)
-                    keys = result.keys()
-                    values = result.first()
-                    if values is None:
-                        result = self.conn.execute(slct)
-                        keys = result.keys()
-                        values = result.first()
-                        source_parent_row = dict(zip(keys, values))
-                        self.create_row_in(source_parent_row, target_db, target_parent)
-
-            # make sure that all referenced rows are in referenced table(s)
-            for constraint in target.constraints:
-                target_referred = target_db.tables[
-                    (constraint["referred_schema"], constraint["referred_table"])
-                ]
-                slct = sa.sql.select(
-                    [
-                        target_referred,
-                    ]
-                )
-                any_non_null_key_columns = False
-                for (referred_col, constrained_col) in zip(
-                    constraint["referred_columns"], constraint["constrained_columns"]
-                ):
-                    slct = slct.where(
-                        target_referred.c[referred_col] == source_row[constrained_col]
-                    )
-                    if source_row[constrained_col] is not None:
-                        any_non_null_key_columns = True
-                        break
-                if any_non_null_key_columns:
-                    target_referred_row = target_db.conn.execute(slct).first()
-                    if not target_referred_row:
-                        result = self.conn.execute(slct)
-                        keys = result.keys()
-                        values = result.first()
-                        # because constraints aren't enforced like real FKs, the
-                        # referred row isn't guaranteed to exist
-                        if values:
-                            source_referred_row = dict(zip(keys, values))
-                            self.create_row_in(
-                                source_referred_row, target_db, target_referred
-                            )
+            self._ensure_required_rows_in_parent_tables(source_row, target, target_db)
+            self._ensure_referenced_rows_in_parent_tables(source_row, target, target_db)
 
             pks = hashable((source_row[key] for key in target.pk))
             target.n_rows += 1
@@ -474,6 +412,65 @@ class Db:
                     child.target.requested.appendleft((desired_row, prioritized))
                 else:
                     child.target.requested.append((desired_row, prioritized))
+
+    def _ensure_required_rows_in_parent_tables(self, source_row, target, target_db):
+        for fk in target.fks:
+            target_parent = target_db.tables[
+                (fk["referred_schema"], fk["referred_table"])
+            ]
+            slct = sa.sql.select([target_parent])
+            any_non_null_key_columns = False
+            for (parent_col, child_col) in zip(
+                fk["referred_columns"], fk["constrained_columns"]
+            ):
+                slct = slct.where(target_parent.c[parent_col] == source_row[child_col])
+                if source_row[child_col] is not None:
+                    any_non_null_key_columns = True
+                    break
+            if any_non_null_key_columns:
+                result = target_db.conn.execute(slct)
+                keys = result.keys()
+                values = result.first()
+                if values is None:
+                    result = self.conn.execute(slct)
+                    keys = result.keys()
+                    values = result.first()
+                    source_parent_row = dict(zip(keys, values))
+                    self.create_row_in(source_parent_row, target_db, target_parent)
+
+    def _ensure_referenced_rows_in_parent_tables(self, source_row, target, target_db):
+        for constraint in target.constraints:
+            target_referred = target_db.tables[
+                (constraint["referred_schema"], constraint["referred_table"])
+            ]
+            slct = sa.sql.select(
+                [
+                    target_referred,
+                ]
+            )
+            any_non_null_key_columns = False
+            for (referred_col, constrained_col) in zip(
+                constraint["referred_columns"], constraint["constrained_columns"]
+            ):
+                slct = slct.where(
+                    target_referred.c[referred_col] == source_row[constrained_col]
+                )
+                if source_row[constrained_col] is not None:
+                    any_non_null_key_columns = True
+                    break
+            if any_non_null_key_columns:
+                target_referred_row = target_db.conn.execute(slct).first()
+                if not target_referred_row:
+                    result = self.conn.execute(slct)
+                    keys = result.keys()
+                    values = result.first()
+                    # because constraints aren't enforced like real FKs, the
+                    # referred row isn't guaranteed to exist
+                    if values:
+                        source_referred_row = dict(zip(keys, values))
+                        self.create_row_in(
+                            source_referred_row, target_db, target_referred
+                        )
 
     @property
     def pending(self):
