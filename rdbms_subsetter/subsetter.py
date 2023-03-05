@@ -71,6 +71,9 @@ import random
 import types
 from collections import OrderedDict, deque
 
+# Geometry must be imported (though unused) for SQLAlchemy to by able to reflect the
+# PostGIS "geometry" type
+from geoalchemy2 import Geometry  # NOQA
 import sqlalchemy as sa
 from blinker import signal
 from sqlalchemy.engine.reflection import Inspector

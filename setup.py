@@ -33,6 +33,7 @@ setup(
     install_requires=[
         "blinker",
         "sqlalchemy>=1.4,<1.5",
+        "geoalchemy2>=0.13,<0.14",
     ],
     license="GNU General Public License v3",
     keywords="database testing",
