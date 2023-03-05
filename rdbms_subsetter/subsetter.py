@@ -722,14 +722,14 @@ def generate():
     schemas = args.schema + [
         None,
     ]
-    source = Db(args.source, args, schemas)
-    target = Db(args.dest, args, schemas)
-    if set(source.tables.keys()) != set(target.tables.keys()):
+    source_db = Db(args.source, args, schemas)
+    target_db = Db(args.dest, args, schemas)
+    if set(source_db.tables.keys()) != set(target_db.tables.keys()):
         raise Exception("Source and target databases have different tables")
-    source.assign_target(target)
-    if source.confirm():
-        source.create_subset_in(target)
-    update_sequences(source, target, schemas, args.tables, args.exclude_tables)
+    source_db.assign_target(target_db)
+    if source_db.confirm():
+        source_db.create_subset_in(target_db)
+    update_sequences(source_db, target_db, schemas, args.tables, args.exclude_tables)
 
 
 def hashable(raw):
