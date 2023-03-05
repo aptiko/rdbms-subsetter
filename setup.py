@@ -31,7 +31,7 @@ setup(
     author_email="catherine.devlin@gsa.gov",
     url="https://github.com/aptiko/rdbms-subsetter",
     install_requires=[
-        "blinker",
+        "blinker>=1.5,<1.6",
         "sqlalchemy>=1.4,<1.5",
         "geoalchemy2>=0.13,<0.14",
     ],
