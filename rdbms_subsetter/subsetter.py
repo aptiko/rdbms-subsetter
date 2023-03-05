@@ -114,6 +114,8 @@ def _find_n_rows(self, estimate=False):
             logging.debug(
                 "failed to get approximate rowcount for %s\n%s" % (self.name, str(e))
             )
+    if self.n_rows < 0:
+        self.n_rows = 0
     if not self.n_rows:
         count_query = sa.select(sa.func.count()).select_from(self)
         self.n_rows = self.db.conn.execute(count_query).fetchone()[0]
