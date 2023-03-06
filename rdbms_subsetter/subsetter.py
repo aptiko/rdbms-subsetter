@@ -436,6 +436,12 @@ class Db:
                     keys = result.keys()
                     values = result.first()
                     source_parent_row = dict(zip(keys, values))
+                    row_references_itself = (target.name == target_parent.name) and (
+                        target.pk_val(source_row)
+                        == target_parent.pk_val(source_parent_row)
+                    )
+                    if row_references_itself:
+                        return
                     self.create_row_in(source_parent_row, target_db, target_parent)
 
     def _ensure_referenced_rows_in_parent_tables(self, source_row, target, target_db):
